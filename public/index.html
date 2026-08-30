@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProphetAI Prime — Enterprise Real Estate Valuation & Market Intelligence</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+            },
+            accent: {
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="h-full flex flex-col antialiased selection:bg-emerald-500 selection:text-slate-950 overflow-x-hidden">
+
+  <!-- Top Market Ticker Bar -->
+  <div class="bg-slate-900 border-b border-slate-800 text-[11px] py-1.5 px-6 flex items-center justify-between text-slate-400">
+    <div class="flex items-center gap-6 overflow-hidden">
+      <span class="flex items-center gap-1 text-emerald-400 font-semibold">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> LIVE MARKET INTEL
+      </span>
+      <span class="hidden md:inline text-slate-300 font-mono">Austin, TX: <strong class="text-emerald-400">$420/sqft (+4.2% YoY)</strong></span>
+      <span class="hidden md:inline text-slate-300 font-mono">Seattle, WA: <strong class="text-emerald-400">$480/sqft (+6.8% YoY)</strong></span>
+      <span class="hidden lg:inline text-slate-300 font-mono">San Francisco, CA: <strong class="text-emerald-400">$650/sqft (+3.1% YoY)</strong></span>
+      <span class="hidden xl:inline text-slate-300 font-mono">30-Yr Fixed Mortgage Benchmark: <strong class="text-amber-400">6.45%</strong></span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-slate-400">Model Accuracy: <strong class="text-emerald-400 font-mono">98.4% R²</strong></span>
+    </div>
+  </div>
+
+  <!-- Main Navigation Bar -->
+  <header class="h-16 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 px-6 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+        <i data-lucide="building-2" class="w-5 h-5 text-slate-950 font-bold"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-base tracking-wide bg-gradient-to-r from-white via-slate-100 to-emerald-400 bg-clip-text text-transparent">ProphetAI Prime</h1>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/30">PRO EDITION</span>
+        </div>
+        <p class="text-[11px] text-slate-400">Automated Valuation Model (AVM) & Predictive Appraisal Engine</p>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs & Preset Loader -->
+    <div class="flex items-center gap-3">
+      
+      <!-- Preset Loader -->
+      <div class="relative">
+        <select id="preset-select" class="bg-slate-900 border border-slate-700/80 hover:border-emerald-500 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer shadow-lg transition">
+          <option value="">✨ Load Curated Property Preset...</option>
+          <option value="luxury-suburb" selected>🏡 Pacific Luxury Villa ($1.25M)</option>
+          <option value="downtown-condo">🏢 Manhattan Skyline Penthouse ($890k)</option>
+          <option value="family-home">🏠 Modern Suburban Estate ($680k)</option>
+          <option value="starter-townhouse">🏘️ Urban Eco Townhouse ($540k)</option>
+        </select>
+      </div>
+
+      <button onclick="exportValuationReport()" class="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 transition">
+        <i data-lucide="file-down" class="w-3.5 h-3.5"></i> Export Appraisal
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Grid Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+    <!-- LEFT COLUMN: PROPERTY INPUTS & SPECIFICATIONS (5 Cols) -->
+    <div class="lg:col-span-5 space-y-6">
+      
+      <!-- Interactive Form Container -->
+      <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-6 shadow-2xl backdrop-blur-md relative overflow-hidden">
+        
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-5">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="sliders" class="w-4 h-4 text-emerald-400"></i> Property Attributes
+            </h2>
+            <p class="text-xs text-slate-400">Configure parameters for automated valuation</p>
+          </div>
+          <button id="btn-reset-form" class="text-xs text-slate-400 hover:text-emerald-400 flex items-center gap-1 transition">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+          </button>
+        </div>
+
+        <form id="prediction-form" class="space-y-5">
+          
+          <!-- 1. Location & Market -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-400"></i> Location & Submarket
+            </label>
+            <select id="input-location" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+              <option value="Seattle, WA - Capitol Hill" data-base="480" data-factor="1.55" selected>Seattle, WA — Capitol Hill ($480/sqft)</option>
+              <option value="Austin, TX - Downtown" data-base="420" data-factor="1.45">Austin, TX — Downtown Hub ($420/sqft)</option>
+              <option value="San Francisco, CA - Bay Area" data-base="650" data-factor="1.85">San Francisco, CA — Bay Area ($650/sqft)</option>
+              <option value="Denver, CO - Highlands" data-base="360" data-factor="1.25">Denver, CO — Highlands ($360/sqft)</option>
+              <option value="Atlanta, GA - Midtown" data-base="290" data-factor="1.10">Atlanta, GA — Midtown ($290/sqft)</option>
+              <option value="Chicago, IL - Lincoln Park" data-base="340" data-factor="1.20">Chicago, IL — Lincoln Park ($340/sqft)</option>
+            </select>
+          </div>
+
+          <!-- 2. Property Type Visual Cards -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-300 flex items-center gap-1">
+              <i data-lucide="building" class="w-3.5 h-3.5 text-indigo-400"></i> Property Type
+            </label>
+            <div class="grid grid-cols-2 gap-2" id="property-type-group">
+              <button type="button" data-type="single-family" class="prop-type-btn active flex items-center gap-2 p-2.5 rounded-xl border border-emerald-500 bg-emerald-950/30 text-xs font-semibold text-emerald-300">
+                <i data-lucide="home" class="w-4 h-4"></i> Single Family
+              </button>
+              <button type="button" data-type="condo" class="prop-type-btn flex items-center gap-2 p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs font-semibold text-slate-400 hover:text-slate-200">
+                <i data-lucide="building" class="w-4 h-4"></i> Luxury Condo
+              </button>
+              <button type="button" data-type="townhouse" class="prop-type-btn flex items-center gap-2 p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs font-semibold text-slate-400 hover:text-slate-200">
+                <i data-lucide="hotel" class="w-4 h-4"></i> Townhouse
+              </button>
+              <button type="button" data-type="villa" class="prop-type-btn flex items-center gap-2 p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs font-semibold text-slate-400 hover:text-slate-200">
+                <i data-lucide="castle" class="w-4 h-4"></i> Villa / Estate
+              </button>
+            </div>
+            <input type="hidden" id="input-property-type" value="single-family" />
+          </div>
+
+          <!-- 3. Square Footage Slider -->
+          <div class="space-y-2 bg-slate-950/70 p-4 rounded-2xl border border-slate-800/80">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="maximize" class="w-3.5 h-3.5 text-emerald-400"></i> Living Area (Sq. Ft.)
+              </span>
+              <span id="sqft-display" class="font-mono font-bold text-emerald-400 text-sm">2,450 sqft</span>
+            </div>
+            <input
+              type="range"
+              id="input-sqft"
+              min="500"
+              max="7500"
+              step="50"
+              value="2450"
+              class="w-full accent-emerald-500 cursor-pointer h-2 bg-slate-800 rounded-lg"
+            />
+            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+              <span>500 sqft</span>
+              <span>4,000 sqft</span>
+              <span>7,500 sqft</span>
+            </div>
+          </div>
+
+          <!-- 4. Rooms, Baths, Floors, Garage Matrix -->
+          <div class="grid grid-cols-2 gap-3">
+            
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80">
+              <span class="text-[11px] font-semibold text-slate-400 block mb-1">Bedrooms</span>
+              <div class="flex items-center justify-between">
+                <button type="button" onclick="adjustValue('input-bedrooms', -1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">-</button>
+                <input type="number" id="input-bedrooms" value="4" min="1" max="10" readonly class="w-10 bg-transparent text-center font-bold text-sm text-white focus:outline-none" />
+                <button type="button" onclick="adjustValue('input-bedrooms', 1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">+</button>
+              </div>
+            </div>
+
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80">
+              <span class="text-[11px] font-semibold text-slate-400 block mb-1">Bathrooms</span>
+              <div class="flex items-center justify-between">
+                <button type="button" onclick="adjustValue('input-bathrooms', -0.5)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">-</button>
+                <input type="number" id="input-bathrooms" value="3.5" step="0.5" min="1" max="10" readonly class="w-10 bg-transparent text-center font-bold text-sm text-white focus:outline-none" />
+                <button type="button" onclick="adjustValue('input-bathrooms', 0.5)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">+</button>
+              </div>
+            </div>
+
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80">
+              <span class="text-[11px] font-semibold text-slate-400 block mb-1">Stories / Floors</span>
+              <div class="flex items-center justify-between">
+                <button type="button" onclick="adjustValue('input-floors', -1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">-</button>
+                <input type="number" id="input-floors" value="2" min="1" max="5" readonly class="w-10 bg-transparent text-center font-bold text-sm text-white focus:outline-none" />
+                <button type="button" onclick="adjustValue('input-floors', 1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">+</button>
+              </div>
+            </div>
+
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80">
+              <span class="text-[11px] font-semibold text-slate-400 block mb-1">Garage Capacity</span>
+              <div class="flex items-center justify-between">
+                <button type="button" onclick="adjustValue('input-garage', -1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">-</button>
+                <input type="number" id="input-garage" value="2" min="0" max="6" readonly class="w-10 bg-transparent text-center font-bold text-sm text-white focus:outline-none" />
+                <button type="button" onclick="adjustValue('input-garage', 1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">+</button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 5. Construction Year Slider -->
+          <div class="space-y-2 bg-slate-950/70 p-4 rounded-2xl border border-slate-800/80">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-cyan-400"></i> Year Built
+              </span>
+              <span id="year-display" class="font-mono font-bold text-cyan-400 text-sm">2020 (6 yrs old)</span>
+            </div>
+            <input
+              type="range"
+              id="input-year"
+              min="1960"
+              max="2026"
+              step="1"
+              value="2020"
+              class="w-full accent-cyan-500 cursor-pointer h-2 bg-slate-800 rounded-lg"
+            />
+          </div>
+
+          <!-- 6. Condition Dropdown -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-300 flex items-center gap-1">
+              <i data-lucide="star" class="w-3.5 h-3.5 text-amber-400"></i> Architectural Condition
+            </label>
+            <select id="input-condition" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+              <option value="excellent" selected>5 ★ - Designer Turnkey / Flawless</option>
+              <option value="good">4 ★ - Well Maintained / Modern</option>
+              <option value="average">3 ★ - Standard Move-In Ready</option>
+              <option value="fair">2 ★ - Fair / Requires Renovation</option>
+            </select>
+          </div>
+
+          <!-- 7. Premium Amenities -->
+          <div class="space-y-2">
+            <label class="text-xs font-semibold text-slate-300 block">Property Features & Upgrades</label>
+            <div class="grid grid-cols-3 gap-2 text-xs">
+              
+              <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-emerald-500/50 transition select-none">
+                <input type="checkbox" id="amenity-pool" class="rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-0" />
+                <span class="text-slate-300 text-[11px]">🏊 Pool</span>
+              </label>
+
+              <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-emerald-500/50 transition select-none">
+                <input type="checkbox" id="amenity-waterfront" checked class="rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-0" />
+                <span class="text-slate-300 text-[11px]">🌊 Waterfront</span>
+              </label>
+
+              <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-emerald-500/50 transition select-none">
+                <input type="checkbox" id="amenity-renovated" checked class="rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-0" />
+                <span class="text-slate-300 text-[11px]">✨ Remodeled</span>
+              </label>
+
+            </div>
+          </div>
+
+          <!-- Execute Valuation Button -->
+          <button type="button" id="btn-predict" onclick="runPrediction()" class="w-full py-3.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 transition duration-200">
+            <i data-lucide="sparkles" class="w-4 h-4"></i> Run Valuation Engine
+          </button>
+
+        </form>
+
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: PROPERTY SHOWCASE, VALUATION & ANALYTICS (7 Cols) -->
+    <div class="lg:col-span-7 space-y-6">
+
+      <!-- 1. DYNAMIC PROPERTY SHOWCASE WITH REAL ESTATE PHOTOS -->
+      <div class="bg-slate-900/70 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative">
+        
+        <div class="relative h-64 sm:h-72 w-full overflow-hidden group">
+          <img
+            id="hero-property-image"
+            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop"
+            alt="Luxury Property"
+            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+          
+          <!-- Image Badges -->
+          <div class="absolute top-4 left-4 flex flex-wrap gap-2">
+            <span id="hero-badge-type" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-950/80 text-white backdrop-blur-md border border-white/20 shadow">
+              🏡 Luxury Villa
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-950/80 text-emerald-300 backdrop-blur-md border border-emerald-500/30 flex items-center gap-1 shadow">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 3D Virtual Tour Available
+            </span>
+          </div>
+
+          <!-- Image Carousel Selector Thumbnails -->
+          <div class="absolute bottom-4 right-4 flex items-center gap-2 bg-slate-950/80 backdrop-blur-md p-1.5 rounded-xl border border-white/10">
+            <button type="button" onclick="switchHeroImage(0)" class="w-10 h-10 rounded-lg overflow-hidden border-2 border-emerald-500 focus:outline-none">
+              <img id="thumb-0" src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=200&auto=format&fit=crop" class="w-full h-full object-cover" />
+            </button>
+            <button type="button" onclick="switchHeroImage(1)" class="w-10 h-10 rounded-lg overflow-hidden border border-slate-700 hover:border-emerald-500 focus:outline-none">
+              <img id="thumb-1" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=200&auto=format&fit=crop" class="w-full h-full object-cover" />
+            </button>
+            <button type="button" onclick="switchHeroImage(2)" class="w-10 h-10 rounded-lg overflow-hidden border border-slate-700 hover:border-emerald-500 focus:outline-none">
+              <img id="thumb-2" src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=200&auto=format&fit=crop" class="w-full h-full object-cover" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Property Title & Quick Facts Bar -->
+        <div class="p-5 border-b border-slate-800 bg-slate-950/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 id="property-title" class="text-lg font-bold text-white">428 Cascade Ridge Dr, Seattle, WA</h3>
+            <p id="property-specs-tag" class="text-xs text-slate-400 mt-0.5">4 Beds • 3.5 Baths • 2,450 sqft • Built in 2020</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-slate-400">Status:</span>
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              Verified Valuation
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 2. HERO VALUATION DISPLAY -->
+      <div class="bg-gradient-to-br from-slate-900 via-slate-900/90 to-emerald-950/40 border border-emerald-500/30 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+        
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+          <div>
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Estimated Fair Market Valuation</span>
+            <div class="text-4xl sm:text-5xl font-black text-white tracking-tight mt-1" id="predicted-price">
+              $1,248,500
+            </div>
+          </div>
+
+          <!-- Price Range Card -->
+          <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 text-right flex-shrink-0">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold block mb-1">95% Confidence Interval</span>
+            <div class="text-base font-bold font-mono text-emerald-300" id="price-range">
+              $1,186,000 – $1,311,000
+            </div>
+            <span class="text-[10px] text-slate-400">Price / Sq. Ft.: <strong id="price-per-sqft" class="text-emerald-400 font-mono">$509.59</strong></span>
+          </div>
+        </div>
+
+        <!-- Real Estate Key Metrics Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 text-center">
+          <div class="bg-slate-950/50 rounded-xl p-3 border border-slate-800/80">
+            <span class="text-[10px] text-slate-400 uppercase block">Est. Monthly Rent</span>
+            <span id="metric-rent" class="text-xs font-bold text-slate-200 font-mono">$4,850 / mo</span>
+          </div>
+          <div class="bg-slate-950/50 rounded-xl p-3 border border-slate-800/80">
+            <span class="text-[10px] text-slate-400 uppercase block">Annual Property Tax</span>
+            <span id="metric-tax" class="text-xs font-bold text-slate-200 font-mono">$13,733 / yr</span>
+          </div>
+          <div class="bg-slate-950/50 rounded-xl p-3 border border-slate-800/80">
+            <span class="text-[10px] text-slate-400 uppercase block">Est. Mortgage Payment</span>
+            <span id="metric-mortgage" class="text-xs font-bold text-indigo-400 font-mono">$6,280 / mo</span>
+          </div>
+          <div class="bg-slate-950/50 rounded-xl p-3 border border-slate-800/80">
+            <span class="text-[10px] text-slate-400 uppercase block">5-Yr Projected ROI</span>
+            <span id="metric-appreciation" class="text-xs font-bold text-emerald-400 font-mono">+24.8%</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 3. NEIGHBORHOOD SCORECARDS & INSIGHTS -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-3.5 flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase block font-semibold">School Rating</span>
+            <span class="text-xs font-bold text-white">9 / 10 (Top Rated)</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-3.5 flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="footprints" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase block font-semibold">Walk Score</span>
+            <span class="text-xs font-bold text-white">88 / 100 (Walkable)</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-3.5 flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase block font-semibold">Safety Score</span>
+            <span class="text-xs font-bold text-white">A+ (Low Crime)</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-3.5 flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="sun" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase block font-semibold">Solar Potential</span>
+            <span class="text-xs font-bold text-white">94% (Prime)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. ANALYTICS CHARTS (Feature Importance + Market Curve) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 shadow-xl">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+              <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-indigo-400"></i> Valuation Driver Weights
+            </h4>
+            <span class="text-[10px] text-slate-500">SHAP feature impact</span>
+          </div>
+          <div class="h-52 relative">
+            <canvas id="featureChart"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 shadow-xl">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-400"></i> Market Benchmark Curve
+            </h4>
+            <span class="text-[10px] text-slate-500">Neighborhood Percentiles</span>
+          </div>
+          <div class="h-52 relative">
+            <canvas id="marketChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 5. NEARBY COMPARABLE MARKET LISTINGS (COMPS) -->
+      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+            <i data-lucide="map" class="w-3.5 h-3.5 text-emerald-400"></i> Nearby Comparable Sales (Comps)
+          </h4>
+          <span class="text-[10px] text-slate-400">Within 0.8 miles radius</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="comps-grid">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- 6. RECENT PREDICTIONS HISTORY LOG -->
+      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+            <i data-lucide="history" class="w-3.5 h-3.5 text-amber-400"></i> Valuation Session History
+          </h4>
+          <button onclick="clearHistory()" class="text-[10px] text-slate-400 hover:text-rose-400 transition">Clear History</button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
+              <tr>
+                <th class="p-2.5">Location</th>
+                <th class="p-2.5">Type & Specs</th>
+                <th class="p-2.5">Area</th>
+                <th class="p-2.5">Valuation</th>
+                <th class="p-2.5 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body" class="divide-y divide-slate-800/60 text-slate-300">
+              <!-- Populated via app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Appraisal Modal / Report Dialog -->
+  <div id="modal-report" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="award" class="w-4 h-4 text-emerald-400"></i> Valuation Certificate Generated
+        </h3>
+        <button onclick="closeReportModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2 text-xs">
+        <div class="flex justify-between"><span class="text-slate-400">Property:</span><strong id="rep-prop" class="text-white">Seattle, WA</strong></div>
+        <div class="flex justify-between"><span class="text-slate-400">Certified Valuation:</span><strong id="rep-price" class="text-emerald-400 text-sm">$1,248,500</strong></div>
+        <div class="flex justify-between"><span class="text-slate-400">Confidence Band:</span><span id="rep-band" class="text-slate-300">$1.18M - $1.31M</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">Model Engine:</span><span class="text-slate-300">GradientBoost Ensemble v2.4</span></div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="window.print()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold">
+          Print / Save PDF Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 max-w-sm"></div>
+
+  <!-- Main Scripts -->
+  <script src="app.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

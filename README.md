@@ -1,6 +1,17 @@
 # 🏡 ProphetAI Prime — Enterprise House Price Predictor & Valuation Engine
 
-A modern, production-grade **Full-Stack Real Estate Automated Valuation Model (AVM)** and Predictive Analytics Web Application powered by **FastAPI**, **Scikit-Learn**, **Tailwind CSS**, and **Chart.js**.
+[![Live Website](https://img.shields.io/badge/🌐_Live_Demo-Open_Website-10b981?style=for-the-badge)](https://amrutavalli4467-sys.github.io/house-price-predictor/)
+[![GitHub Repo](https://img.shields.io/badge/🐙_Source_Code-GitHub-6366f1?style=for-the-badge)](https://github.com/amrutavalli4467-sys/house-price-predictor)
+[![Model Accuracy](https://img.shields.io/badge/ML_Accuracy-98.4%25_R²-0ea5e9?style=for-the-badge)](https://amrutavalli4467-sys.github.io/house-price-predictor/)
+
+---
+
+## 🌐 Quick Access Links
+
+- 🚀 **Click here to open the Live Public Website:** **[https://amrutavalli4467-sys.github.io/house-price-predictor/](https://amrutavalli4467-sys.github.io/house-price-predictor/)**
+- 💻 **Click here to open Localhost Server (When running locally):** **[http://localhost:8000](http://localhost:8000)**
+
+---
 
 ![ProphetAI Banner](https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop)
 
@@ -36,21 +47,23 @@ A modern, production-grade **Full-Stack Real Estate Automated Valuation Model (A
 
 ---
 
-## 🛠️ Quick Start
+## 🛠️ How to Run Locally
 
 ### 1-Click Launch (Windows)
-Double-click [`start.bat`](start.bat) to launch the server and open `http://localhost:8000`.
+Double-click [`start.bat`](start.bat) to automatically launch the server and open **[http://localhost:8000](http://localhost:8000)** in your default browser.
 
 ### Using Python FastAPI
 ```bash
 pip install -r requirements.txt
 python -m uvicorn app:app --port 8000 --reload
 ```
+Then open: **[http://localhost:8000](http://localhost:8000)**
 
 ### Using Node.js
 ```bash
 node server.js
 ```
+Then open: **[http://localhost:8000](http://localhost:8000)**
 
 ---
 
